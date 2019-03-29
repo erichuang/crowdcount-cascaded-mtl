@@ -4,11 +4,11 @@
 % the training set is set aside for validation     %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-clc; clear all;
-seed = 95461354;
-rng(seed)
+% clc; clear all;
+% seed = 95461354;
+% rng(seed)
 N = 9;
-dataset = 'A';
+dataset = 'B';
 dataset_name = ['shanghaitech_part_' dataset '_patches_' num2str(N)];
 path = ['../data/original/shanghaitech/part_' dataset '_final/train_data/images/'];
 output_path = '../data/formatted_trainval/';

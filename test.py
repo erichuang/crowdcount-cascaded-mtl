@@ -16,7 +16,12 @@ save_output = True
 data_path =  './data/original/shanghaitech/part_A_final/test_data/images/'
 gt_path = './data/original/shanghaitech/part_A_final/test_data/ground_truth_csv/'
 model_path = './final_models/cmtl_shtechA_204.h5'
+# model_path = './saved_models/cmtl_shtechA_1762.h5'
 
+# data_path =  './data/original/shanghaitech/part_B_final/test_data/images/'
+# gt_path = './data/original/shanghaitech/part_B_final/test_data/ground_truth_csv/'
+# model_path = './final_models/cmtl_shtechB_768.h5'
+# model_path = './saved_models/cmtl_shtechB_732.h5'
 
 output_dir = './output/'
 model_name = os.path.basename(model_path).split('.')[0]
@@ -28,20 +33,20 @@ output_dir = os.path.join(output_dir, 'density_maps_' + model_name)
 if not os.path.exists(output_dir):
     os.mkdir(output_dir)
 #load test data
-data_loader = ImageDataLoader(data_path, gt_path, shuffle=False, gt_downsample=True, pre_load=True)
+data_loader = ImageDataLoader(data_path, gt_path, shuffle=False, gt_downsample=True, pre_load=False)
 
 net = CrowdCounter()
       
 trained_model = os.path.join(model_path)
 network.load_net(trained_model, net)
-net.cuda()
+# net.cuda()
 net.eval()
 mae = 0.0
 mse = 0.0
 for blob in data_loader:                        
     im_data = blob['data']
     gt_data = blob['gt_density']
-    density_map = net(im_data, gt_data)
+    density_map = net(im_data)
     density_map = density_map.data.cpu().numpy()
     gt_count = np.sum(gt_data)
     et_count = np.sum(density_map)
@@ -56,7 +61,7 @@ for blob in data_loader:
         
 mae = mae/data_loader.get_num_samples()
 mse = np.sqrt(mse/data_loader.get_num_samples())
-print 'MAE: %0.2f, MSE: %0.2f' % (mae,mse)
+print('MAE: %0.2f, MSE: %0.2f' % (mae,mse))
 
 f = open(file_results, 'w') 
 f.write('MAE: %0.2f, MSE: %0.2f' % (mae,mse))

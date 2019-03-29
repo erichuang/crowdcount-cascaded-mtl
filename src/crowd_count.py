@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-import network
-from models import CMTL
+import src.network as network
+from src.models import CMTL
 
 class CrowdCounter(nn.Module):
     def __init__(self, ce_weights=None):
@@ -20,13 +20,13 @@ class CrowdCounter(nn.Module):
         return self.loss_mse + 0.0001*self.cross_entropy
     
     def forward(self,  im_data, gt_data=None, gt_cls_label=None, ce_weights=None):        
-        im_data = network.np_to_variable(im_data, is_cuda=True, is_training=self.training)                        
+        im_data = network.np_to_variable(im_data, is_cuda=False, is_training=self.training)                        
         density_map, density_cls_score = self.CCN(im_data)
-        density_cls_prob = F.softmax(density_cls_score)
         
         if self.training:                        
-            gt_data = network.np_to_variable(gt_data, is_cuda=True, is_training=self.training)            
-            gt_cls_label = network.np_to_variable(gt_cls_label, is_cuda=True, is_training=self.training,dtype=torch.FloatTensor)                        
+            density_cls_prob = F.softmax(density_cls_score, dim=1)
+            gt_data = network.np_to_variable(gt_data, is_cuda=False, is_training=self.training)            
+            gt_cls_label = network.np_to_variable(gt_cls_label, is_cuda=False, is_training=self.training,dtype=torch.FloatTensor)                        
             self.loss_mse, self.cross_entropy = self.build_loss(density_map, density_cls_prob, gt_data, gt_cls_label, ce_weights)
             
             

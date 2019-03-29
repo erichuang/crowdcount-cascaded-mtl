@@ -3,8 +3,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-clc; clear all;
-dataset = 'A';
+% clc; clear all;
+dataset = 'B';
 dataset_name = ['shanghaitech_part_' dataset ];
 path = ['../data/original/shanghaitech/part_' dataset '_final/test_data/images/'];
 gt_path = ['../data/original/shanghaitech/part_' dataset '_final/test_data/ground_truth/'];

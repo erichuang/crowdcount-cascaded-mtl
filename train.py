@@ -30,14 +30,14 @@ def log_print(text, color=None, on_color=None, attrs=None):
         
 
 method = 'cmtl' #method name - used for saving model file
-dataset_name = 'shtechA' #dataset name - used for saving model file
+dataset_name = 'shtechB' #dataset name - used for saving model file
 output_dir = './saved_models/' #model files are saved here
 
 #train and validation paths
-train_path = './data/formatted_trainval/shanghaitech_part_A_patches_9/train'
-train_gt_path = './data/formatted_trainval/shanghaitech_part_A_patches_9/train_den'
-val_path = './data/formatted_trainval/shanghaitech_part_A_patches_9/val'
-val_gt_path = './data/formatted_trainval/shanghaitech_part_A_patches_9/val_den'
+train_path = './data/formatted_trainval/shanghaitech_part_B_patches_9/train'
+train_gt_path = './data/formatted_trainval/shanghaitech_part_B_patches_9/train_den'
+val_path = './data/formatted_trainval/shanghaitech_part_B_patches_9/val'
+val_gt_path = './data/formatted_trainval/shanghaitech_part_B_patches_9/val_den'
 
 #training configuration
 start_step = 0
@@ -49,7 +49,7 @@ log_interval = 250
 
 
 #Tensorboard  config
-use_tensorboard = False
+use_tensorboard = True
 save_exp_name = method + '_' + dataset_name + '_' + 'v1'
 remove_all_log = False   # remove all historical experiments in TensorBoardO
 exp_name = None # the previous experiment name in TensorBoard
@@ -87,7 +87,9 @@ if use_tensorboard:
         cc.remove_all_experiments()
     if exp_name is None:
         exp_name = datetime.now().strftime('vgg16_%m-%d_%H-%M')
-        exp_name = save_exp_name 
+        exp_name = save_exp_name
+        if exp_name in cc.get_experiment_names():
+            cc.remove_experiment(exp_name)
         exp = cc.create_experiment(exp_name)
     else:
         exp = cc.open_experiment(exp_name)
@@ -99,7 +101,7 @@ re_cnt = False
 t = Timer()
 t.tic()
 
-best_mae = sys.maxint
+best_mae = sys.maxsize
 
 for epoch in range(start_step, end_step+1):    
     step = -1
@@ -121,7 +123,7 @@ for epoch in range(start_step, end_step+1):
             
         density_map = net(im_data, gt_data, gt_class_label, class_wts)
         loss = net.loss
-        train_loss += loss.data[0]
+        train_loss += loss.data
         step_cnt += 1
         optimizer.zero_grad()
         loss.backward()
@@ -160,7 +162,4 @@ for epoch in range(start_step, end_step+1):
         if use_tensorboard:
             exp.add_scalar_value('MAE', mae, step=epoch)
             exp.add_scalar_value('MSE', mse, step=epoch)
-            exp.add_scalar_value('train_loss', train_loss/data_loader.get_num_samples(), step=epoch)
-        
-    
-
+            exp.add_scalar_value('train_loss', train_loss.item() / data_loader.get_num_samples(), step=epoch)

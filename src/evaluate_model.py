@@ -1,5 +1,5 @@
-from crowd_count import CrowdCounter
-import network
+from src.crowd_count import CrowdCounter
+import src.network as network
 import numpy as np
 
 def evaluate_model(trained_model, data_loader):    

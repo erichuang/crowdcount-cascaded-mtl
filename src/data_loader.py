@@ -23,7 +23,7 @@ class ImageDataLoader():
         self.num_samples = len(self.data_files)
         self.blob_list = {}        
         self.id_list = range(0,self.num_samples)
-        self.min_gt_count = sys.maxint
+        self.min_gt_count = sys.maxsize
         self.max_gt_count = 0
         self.num_classes = num_classes
         self.count_class_hist = np.zeros(self.num_classes)        
@@ -44,7 +44,7 @@ class ImageDataLoader():
         return wts
         
     def preload_data(self):
-        print 'Pre-loading the data. This may take a while...'
+        print('Pre-loading the data. This may take a while...')
         idx = 0
         for fname in self.data_files:            
             img, den, gt_count = self.read_image_and_gt(fname)
@@ -60,8 +60,8 @@ class ImageDataLoader():
             self.blob_list[idx] = blob
             idx = idx+1
             if idx % 100 == 0:                               
-                print 'Loaded ', idx , '/' , self.num_samples
-        print 'Completed laoding ' ,idx, 'files'
+                print('Loaded ', idx, '/', self.num_samples)
+        print('Completed laoding ', idx, 'files')
         
         
     def assign_gt_class_labels(self):        
@@ -78,9 +78,9 @@ class ImageDataLoader():
     def __iter__(self):
         if self.shuffle:            
             if self.pre_load:            
-                random.shuffle(self.id_list)        
+                random.shuffle(list(self.id_list))
             else:
-                random.shuffle(self.data_files)
+                random.shuffle(list(self.data_files))
                 
         files = self.data_files
         id_list = self.id_list
@@ -113,12 +113,12 @@ class ImageDataLoader():
     
     def get_stats_in_dataset(self):
         
-        min_count = sys.maxint
+        min_count = sys.maxsize
         max_count = 0
         gt_count_array = np.zeros(self.num_samples)
         i = 0
         for fname in self.data_files:
-            den = pd.read_csv(os.path.join(self.gt_path,os.path.splitext(fname)[0] + '.csv'), sep=',',header=None).as_matrix()                        
+            den = pd.read_csv(os.path.join(self.gt_path,os.path.splitext(fname)[0] + '.csv'), sep=',',header=None).values
             den  = den.astype(np.float32, copy=False)
             gt_count = np.sum(den)
             min_count = min(min_count, gt_count)
@@ -144,15 +144,15 @@ class ImageDataLoader():
         img = img.astype(np.float32, copy=False)
         ht = img.shape[0]
         wd = img.shape[1]
-        ht_1 = (ht/4)*4
-        wd_1 = (wd/4)*4
+        ht_1 = int((ht/4)*4)
+        wd_1 = int((wd/4)*4)
         img = cv2.resize(img,(wd_1,ht_1))
         img = img.reshape((1,1,img.shape[0],img.shape[1]))
-        den = pd.read_csv(os.path.join(self.gt_path,os.path.splitext(fname)[0] + '.csv'), sep=',',header=None).as_matrix()                        
+        den = pd.read_csv(os.path.join(self.gt_path,os.path.splitext(fname)[0] + '.csv'), sep=',',header=None).values
         den  = den.astype(np.float32, copy=False)
         if self.gt_downsample:
-            wd_1 = wd_1/4
-            ht_1 = ht_1/4
+            wd_1 = int(wd_1/4)
+            ht_1 = int(ht_1/4)
             den = cv2.resize(den,(wd_1,ht_1))                
             den = den * ((wd*ht)/(wd_1*ht_1))
         else:
